@@ -1,5 +1,6 @@
 \name{GGPA2-internal}
 \title{Internal GGPA2 objects}
+\alias{makesimul}
 \alias{Rcpp_cGGPA2-class}
 \alias{Gibbs_e_it_no_ann}
 \alias{cGGPA2}
