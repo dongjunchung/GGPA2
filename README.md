@@ -1,7 +1,7 @@
-graph-GPA
+graph-GPA 2.0
 ===
 
-graph-GPA is a graphical model for prioritizing GWAS results and investigating pleiotropic architecture and enrichment for functional annotation within a unified framework (Deng et al., 2022; Chung et al., 2017). 'GGPA2' package provides user-friendly interface to fit graph-GPA models, implement association mapping, generate a phenotype graph, and implement enrichment analysis for functional annotation. It also allows to utilize a prior phenotype graph (Kim et al., 2017).
+graph-GPA 2.0 is a graphical model for prioritizing GWAS results and investigating pleiotropic architecture and enrichment for functional annotation within a unified framework (Deng et al., 2022; Chung et al., 2017). 'GGPA2' package provides user-friendly interface to fit graph-GPA 2.0 models, implement association mapping, generate a phenotype graph, and implement enrichment analysis for functional annotation. It also allows to utilize a prior phenotype graph (Kim et al., 2017).
 
 DDNet
 ===
