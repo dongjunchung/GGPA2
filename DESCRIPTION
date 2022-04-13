@@ -13,7 +13,7 @@ Depends: R (>= 3.6.2), stats, methods, graphics, GGally, network, sna,
 Suggests: BiocStyle
 Imports: Rcpp (>= 0.11.3)
 LinkingTo: Rcpp, RcppArmadillo
-RcppModules: cGGPAannotmodule
+RcppModules: cGGPA2module
 NeedsCompilation: yes
 biocViews: Software, StatisticalMethod, Classification,
         GenomeWideAssociation, SNP, Genetics, Clustering,
