@@ -1,13 +1,13 @@
-\name{simulation}
+\name{simulation_Annot}
+\alias{simulation_Annot}
 \docType{data}
-\alias{simulation}
 \title{Simulation data for graph-GPA 2.0}
 \description{
-  This is an simulation dataset.
+This is an simulation dataset with annotations.
 }
-\usage{ data("simulation") }
+\usage{data("simulation_Annot")}
 \format{
-  \code{simulation} list object containing simulation data (element Y) and its simulation setting (the remaining elements).
+  \code{simulation_Annot} list object containing simulation data (element Y) and its simulation setting (the remaining elements).
 }
 \references{
 Deng Q, Nam JH, Yilmaz AS, Chang W, Pietrzak M, Li L, Kim HJ, and Chung D (2022), "graph-GPA 2.0: A graphical model for multi-disease analysis of GWAS results with integration of functional annotation data."
@@ -21,8 +21,8 @@ Chung D, Kim H, and Zhao H (2016),
 \examples{
 
 # The simulation data set is included with the GGPA2 package
-data(simulation)
-head(t(simulation$pmat))
-
+data(simulation_Annot)
+head(t(simulation_Annot$pmat))
+head(t(simulation_Annot$A_mat))
 }
 \keyword{datasets}
