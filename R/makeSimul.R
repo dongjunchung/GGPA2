@@ -1,5 +1,5 @@
 
-makesimul = function( true_G, Beta_ij, Alpha_i, mu1, sigma1, true_Gamma = NULL, A_mat = NULL, n_SNP=20000 ) {
+makeSimul = function( true_G, Beta_ij, Alpha_i, mu1, sigma1, true_Gamma = NULL, A_mat = NULL, n_SNP=20000 ) {
 	
 		# n_SNP <- 20000 ; # number of SNPs, t=1,...,n_SNP
 		n_pheno = dim(true_G)[[1]] ; # number of phenotypes, i=1,...,n_pheno
