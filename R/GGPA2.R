@@ -3,6 +3,7 @@
 
 GGPA2 <- function( gwasPval, pgraph=NULL, annotMat=NULL, nBurnin=10000, nMain=40000, lbPval=1e-10, verbose=1 ) {
 
+  
 	# summarizing setting for graph-GPA
 
 	mcmcSetting <- list()
@@ -148,6 +149,9 @@ GGPA2 <- function( gwasPval, pgraph=NULL, annotMat=NULL, nBurnin=10000, nMain=40
     annotMat = array(0,c(n_annot,n_SNP))
   } else {
     have_annot = TRUE
+    
+    annotMat = t(annotMat) # transpose annotaMat
+    
     n_annot = dim(annotMat)[[1]]
   	if ( nrow(gwasPval) != ncol(annotMat) ) {
     	stop( "nrow(gwasPval) != ncol(annotMat)" )

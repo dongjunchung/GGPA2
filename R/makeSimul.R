@@ -1,6 +1,7 @@
 
 makeSimul = function( true_G, Beta_ij, Alpha_i, mu1, sigma1, true_Gamma = NULL, A_mat = NULL, n_SNP=20000 ) {
 	
+  
 		# n_SNP <- 20000 ; # number of SNPs, t=1,...,n_SNP
 		n_pheno = dim(true_G)[[1]] ; # number of phenotypes, i=1,...,n_pheno
 		iter.gibbs <- 1000 # Gibbs interation to generate initial "e"
@@ -19,7 +20,9 @@ makeSimul = function( true_G, Beta_ij, Alpha_i, mu1, sigma1, true_Gamma = NULL, 
 		emat = NULL 
 		if ( (is.null(true_Gamma)) || (is.null(A_mat)) ){
 			emat = Gibbs_e_it_no_ann(true_Beta, true_G, n_SNP, iter.gibbs)			
-		} else { 
+		} else {
+		  # transpose A_mat
+		  A_mat = t(A_mat)
 			emat = Gibbs_e_it_ann(true_Beta, true_G, n_SNP, iter.gibbs, true_Gamma, A_mat)
 		} # if ... else ... 
 		
@@ -31,7 +34,7 @@ makeSimul = function( true_G, Beta_ij, Alpha_i, mu1, sigma1, true_Gamma = NULL, 
 
 		pmat = 1 - pnorm( Y_mat )
 			
-		return(list(pmat=pmat,Y_mat=Y_mat,true_E_mat=emat,true_beta=true_Beta,true_G=true_G,true_mu1=mu1,true_sigma1=sigma1,true_Gamma=true_Gamma,A_mat=A_mat)) 
+		return(list(pmat=pmat,Y_mat=Y_mat,true_E_mat=emat,true_beta=true_Beta,true_G=true_G,true_mu1=mu1,true_sigma1=sigma1,true_Gamma=true_Gamma,A_mat=t(A_mat))) 
 		
 } # makesimul
 

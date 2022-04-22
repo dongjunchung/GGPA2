@@ -44,31 +44,42 @@ Chung D, Kim H, and Zhao H (2016),
 \examples{
 # load simulation data
 
-data(simulation)
-		
+data(simulationAnnot)
+
 # fit graph-GPA 2.0 model
 
-fit <- GGPA2( simulation$pmat, nBurnin=200, nMain=200 )
+fit <- GGPA2( simulationAnnot$pmat, nBurnin=200, nMain=200 )
 fit
 
 # fit graph-GPA 2.0 model using a prior phenotype graph
 # as an example, edge 6-7 added & edge 2-3 removed in pgraph
 
-pgraph <- matrix( 0, ncol(simulation$pmat), ncol(simulation$pmat) )
+pgraph <- matrix( 0, ncol(simulationAnnot$pmat), ncol(simulationAnnot$pmat) )
 pgraph[1,2] <- pgraph[1,3] <- pgraph[6,7] <- pgraph[4,5] <- 1
-fit.pg <- GGPA2( simulation$pmat, pgraph, nBurnin=200, nMain=200 )
-fit.pg
+fit_prior <- GGPA2( simulationAnnot$pmat, pgraph = pgraph, nBurnin=200, nMain=200 )
+fit_prior
+
+
+# fit graph-GPA 2.0 model using a prior phenotype graph and functional annotations
+
+fit_annot <- GGPA2( simulationAnnot$pmat, pgraph = pgraph, annotMat = simulationAnnot$A_mat, nBurnin=200, nMain=200 )
+
 
 # association mapping for each phenotype
 
-head(assoc( fit, FDR=0.1, fdrControl="global" ))
+head(assoc( fit_annot, FDR=0.1, fdrControl="global" ))
 
 # hypothesis testing for 1st and 2nd phenotype pair
 
-head(assoc( fit, FDR=0.1, fdrControl="global", i=1, j=2 ))
+head(assoc( fit_annot, FDR=0.1, fdrControl="global", i=1, j=2 ))
 
 # plot phenotype graph
 
 plot(fit)
-plot(fit.pg)
+plot(fit_prior)
+plot(fit_annot)
+
+
+
+
 }

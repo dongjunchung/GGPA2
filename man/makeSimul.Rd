@@ -31,7 +31,7 @@ makeSimul(true_G, Beta_ij, Alpha_i, mu1, sigma1, true_Gamma = NULL, A_mat = NULL
   An n by M matrix represents the true \eqn{\gamma_{im}}. \eqn{\gamma_{im}} is the coefficient for importance of annotation m for phenotype i. If Null, simulated data without annotations would be generated. true_Gamma and A_mat must be set jointly.
   }
   \item{A_mat}{
-  An M by T matrix consists of binary indicators representing the true annotations. 1 means the SNP is functional in the corresponding annotation. If Null, simulated data without annotations would be generated. true_Gamma and A_mat must be set jointly.
+  An T by M matrix consists of binary indicators representing the true annotations, where its row and column correspond to SNP and annotation, respectively. 1 means the SNP is functional in the corresponding annotation. If Null, simulated data without annotations would be generated. true_Gamma and A_mat must be set jointly.
   }
   \item{n_SNP}{
   Number of SNPs to generate in the simulated dataset. Default is 20,000.
@@ -42,6 +42,10 @@ makeSimul(true_G, Beta_ij, Alpha_i, mu1, sigma1, true_Gamma = NULL, A_mat = NULL
 }
 \value{
 Construct a list of simulated data.
+  \item{pmat}{p-values, where its row and column correspond to SNP and phenotype, respectively.}
+  \item{Y_mat}{z scores, where its row and column correspond to SNP and phenotype, respectively.}
+  \item{A_mat}{binary annotations, where its row and column correspond to SNP and annotation, respectively.}
+
 }
 \references{
 Deng Q, Nam JH, Yilmaz AS, Chang W, Pietrzak M, Li L, Kim HJ, and Chung D (2022), "graph-GPA 2.0: A graphical model for multi-disease analysis of GWAS results with integration of functional annotation data."
@@ -57,27 +61,30 @@ Hang J. Kim, Dongjun Chung, Qiaolan Deng
 
 
 \examples{
+
 data("simulation")
 dim(simulation$pmat)
 
-# The simulated data is going to include 6 phenotypes.
-# true beta and alpha
-true_beta <- simulation$true_beta[1:6,1:6]
-true_beta[1,2] <- true_beta[2,1] <- 3.2
+# The simulated data is going to include 7 phenotypes.
 
+# true beta and alpha
+true_beta <- simulation$true_beta
+
+# true adjacent matrix
+adjmat <- simulation$true_G
 
 # Generate the annotation matrix, A_annot, with 5 annotations.
-n = 6
+n = 7
 T = 20000
 M = 5
 
 #set.seed(1)
-A_annot = matrix(rbinom(T*M,size=1,prob = 0.1),nrow = M)
+A_annot = t(matrix(rbinom(T*M,size=1,prob = 0.1),nrow = M))
 
 
 # true mu and sigma
-true_mu <- c(1.05,0.9,1.0,1.0,1.05,0.95)
-true_sigma <- c(0.4,0.3,0.35,0.3,0.45,0.4)
+true_mu <- simulation$true_mu1
+true_sigma <- simulation$true_sigma1
 
 # true Gamma
 true_Gamma = rbind(
@@ -86,16 +93,18 @@ true_Gamma = rbind(
   c(1,0,0,0,0),
   c(0,2,0,0,0),
   c(0,2,0,0,0),
+  c(0,2,0,0,0),
   c(0,2,0,0,0)
 )
 
+# generate simulated data
 simdata <- makeSimul(true_G = adjmat, 
-                  Beta_ij = true_beta, 
-                  Alpha_i = diag(true_beta), 
-                  mu1 = true_mu, 
-                  sigma1 = true_sigma, 
-                  true_Gamma = true_Gamma, 
-                  A_mat = A_annot, 
-                  n_SNP=T)
+                     Beta_ij = true_beta, 
+                     Alpha_i = diag(true_beta), 
+                     mu1 = true_mu, 
+                     sigma1 = true_sigma, 
+                     true_Gamma = true_Gamma, 
+                     A_mat = A_annot, 
+                     n_SNP=T)
 }
 \keyword{methods}
