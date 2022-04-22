@@ -46,10 +46,11 @@ Chung D, Kim H, and Zhao H (2016),
 }
 \examples{
 
-# Load the included simulation data
+
+# Load the included simulation data without annotations
 data(simulation)
 
-# fit GGPA model with 200 iterations and a burn-in of 200 iterations
+# fit GGPA2 model with 200 iterations and a burn-in of 200 iterations
 # Note that we recommend more than 200 iterations in practice
 fit <- GGPA2( simulation$pmat, nMain = 200, nBurnin = 200)
 
@@ -61,6 +62,14 @@ head(assoc( fit, FDR=0.1, fdrControl="global", i=1, j=2 ))
 
 # plot the GGPA2 model fit
 plot(fit)
+
+# fit GGPA2 model with a prior graph
+fit_prior <- GGPA2(simulation$pmat, pgraph = simulation$true_G, nMain = 200, nBurnin = 200)
+
+# fit GGPA2 model with a prior graph and annotations
+data(simulation_Annot)
+fit_annot <- GGPA2(simulation_Annot$pmat, pgraph = simulation_Annot$true_G, annotMat = simulation_Annot$A_mat, nMain = 200, nBurnin = 200)
+
 
 }
 \keyword{models}

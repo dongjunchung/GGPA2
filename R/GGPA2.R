@@ -152,6 +152,7 @@ GGPA2 <- function( gwasPval, pgraph=NULL, annotMat=NULL, nBurnin=10000, nMain=40
   	if ( nrow(gwasPval) != ncol(annotMat) ) {
     	stop( "nrow(gwasPval) != ncol(annotMat)" )
   	}
+    message( "Info: Number of Annotations: ", nrow(annotMat) )
   }	
   model$annotMat = annotMat
   model$have_annot = have_annot
