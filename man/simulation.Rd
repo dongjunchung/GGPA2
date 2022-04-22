@@ -7,7 +7,7 @@
 }
 \usage{ data("simulation") }
 \format{
-  \code{simulation} list object containing simulation data (element Y) and its simulation setting (the remaining elements).
+  \code{simulation} list object containing simulation data (element pmat and Y_mat) and its simulation setting (the remaining elements). It includes 20,000 SNPs and 7 phenotypes.
 }
 \references{
 Deng Q, Nam JH, Yilmaz AS, Chang W, Pietrzak M, Li L, Kim HJ, and Chung D (2022), "graph-GPA 2.0: A graphical model for multi-disease analysis of GWAS results with integration of functional annotation data."
@@ -22,7 +22,7 @@ Chung D, Kim H, and Zhao H (2016),
 
 # The simulation data set is included with the GGPA2 package
 data(simulation)
-head(t(simulation$pmat))
+head(simulation$pmat)
 
 }
 \keyword{datasets}

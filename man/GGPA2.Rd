@@ -57,18 +57,40 @@ fit <- GGPA2( simulation$pmat, nMain = 200, nBurnin = 200)
 # Association mapping with FDR of 0.1 and global control
 head(assoc( fit, FDR=0.1, fdrControl="global" ))
 
-# We may specift i = 1 and j = 2 if we are interested in that specific phenotype
+# We may specift i = 1 and j = 2 if we are interested in SNPs shared between phenotypes i and j
 head(assoc( fit, FDR=0.1, fdrControl="global", i=1, j=2 )) 
 
 # plot the GGPA2 model fit
 plot(fit)
 
+
+
 # fit GGPA2 model with a prior graph
 fit_prior <- GGPA2(simulation$pmat, pgraph = simulation$true_G, nMain = 200, nBurnin = 200)
 
+# Association mapping with FDR of 0.1 and global control
+head(assoc( fit_prior, FDR=0.1, fdrControl="global" ))
+
+# We may specift i = 1 and j = 2 if we are interested in SNPs shared between phenotypes i and j
+head(assoc( fit_prior, FDR=0.1, fdrControl="global", i=1, j=2 )) 
+
+# plot the GGPA2 model fit
+plot(fit_prior)
+
+
+
 # fit GGPA2 model with a prior graph and annotations
-data(simulation_Annot)
-fit_annot <- GGPA2(simulation_Annot$pmat, pgraph = simulation_Annot$true_G, annotMat = simulation_Annot$A_mat, nMain = 200, nBurnin = 200)
+data(simulationAnnot)
+fit_annot <- GGPA2(simulationAnnot$pmat, pgraph = simulationAnnot$true_G, annotMat = simulationAnnot$A_mat, nMain = 200, nBurnin = 200)
+
+# Association mapping with FDR of 0.1 and global control
+head(assoc( fit_annot, FDR=0.1, fdrControl="global" ))
+
+# We may specift i = 1 and j = 2 if we are interested in SNPs shared between phenotypes i and j
+head(assoc( fit_annot, FDR=0.1, fdrControl="global", i=1, j=2 )) 
+
+# plot the GGPA2 model fit
+plot(fit_annot)
 
 
 }
