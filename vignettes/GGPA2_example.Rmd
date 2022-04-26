@@ -1,0 +1,189 @@
+---
+title: "Multi-disease Analysis of GWAS Results with Integration of Functional Annotation Data using 'GGPA2' package"
+author: "Qiaolan Deng, Jin Hyun Nam, Ayse Selen Yilmaz, Won Chang, Maciej Pietrzak, Lang Li, Hang J. Kim, Dongjun Chung"
+
+date: "`r Sys.Date()`"
+output: 
+    rmarkdown::html_vignette
+    #bookdown::html_document2
+vignette: >
+  %\VignetteIndexEntry{Multi-disease Analysis of GWAS Results with Integration of Functional Annotation Data using 'GGPA2' package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(knitr)
+```
+
+
+# 1. Overview 
+
+This vignette provides an introduction to the multi-disease analysis of GWAS results using the **GGPA2** package.
+R package **GGPA2** implements graph-GPA 2.0 (GGPA2) [@deng2022graph], a novel statistical framework to integrate GWAS datasets for multiple phenotypes and incorporate functional annotations within a unified framework. We encourage questions or requests regarding **GGPA2** package to be posted on [Github](https://github.com/dongjunchung/GGPA2) for **GGPA2**. Users can find the most up-to-date versions of **GGPA2** package in our [GitHub page](https://dongjunchung.github.io/GGPA2/).
+
+The package can be installed and loaded with the command:
+
+```{r, eval=FALSE}
+#install.packages("devtools")
+library(devtools)
+install_github("dongjunchung/GGPA2")
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(GGPA2)
+```
+
+
+This vignette is organized as follows.
+First, we introduce the overall GGPA2 analysis workflow including model fitting, association mapping, and visualization of an estimate phenotype graph. Second, we illustrate how a prior disease graph can be queried and downloaded from the GGPA2 companion website.
+
+
+# 2. Workflow
+
+*All the results below are based on the 200 burn-in and 200 main MCMC iterations for quick testing and building of the R package. These results are provided here only for the illustration purpose and should not be considered as real results. We recommend users to use sufficient number of burn-in and main MCMC iterations, as we use 10,000 burn-in and 40,000 main MCMC iterations for all the results in our manuscript [@deng2022graph]*.
+
+In this vignette, we use the simulated GWAS data for $20,000$ SNPs, 7 phenotypes,, and 5 functional annotations for the illustration purpose. Users can find a $p$-value matrix of size $20,000 \times 7$ and a annotation matrix of size $20,000 \times 5$  in the `simulationAnnot` object. Note that **1** in the annotation matrix means a SNP is functional in the corresponding annotation, vice versa.
+
+```{r}
+data("simulationAnnot")
+dim(simulationAnnot$pmat)
+dim(simulationAnnot$A_mat)
+head(simulationAnnot$pmat)
+head(simulationAnnot$A_mat)
+```
+
+
+In this simulation studies, we assume a cluster of correlated phenotypes (n1, n2, n3), two pairs of correlated phenotypes (n3 and n4, n4 and n5), and two independent phenotypes (n6, n7), as illustrated in Figure 1. Parameters used to generate simulation data can be found in the list object `simulationAnnot`. More details about simulation data generation procedure can be found in our manuscript [@deng2022graph].
+
+```{r trueG, fig.cap="Figure 1: True phenotype graph for simulation studies"}
+adjmat <- simulationAnnot$true_G
+ggnet2( adjmat, label=TRUE, size=7, mode = "circle",color = "lightblue" )
+```
+
+
+## Fitting the GGPA2 Model
+
+We are now ready to fit a GGPA2 model using the GWAS $p$-value data and functional annotations. R package **GGPA2** provides flexible analysis framework and automatically adjusts its model structure based on the provided data. Users can fit the graph-GPA model with the command:
+
+```{r}
+set.seed(12345)
+fit <- GGPA2(gwasPval = simulationAnnot$pmat, annotMat = simulationAnnot$A_mat, nBurnin = 200, nMain = 200)
+```
+
+The following command prints out a summary of graph-GPA model fit, including data summary, proportion of SNPs associated with each phenotype, parameter estimates, and their standard errors.
+
+```{r}
+fit
+```
+
+Parameter estimates and their standard errors can be extracted using methods `estimate`.
+
+```{r}
+str(estimates(fit))
+```
+
+
+## Association Mapping
+
+Now, based on the fitted GGPA2 model, we implement association mapping with the command:
+
+```{r}
+assoc.marg <- assoc( fit, FDR=0.10, fdrControl="global" )
+dim(assoc.marg)
+apply( assoc.marg, 2, table )
+```
+
+`assoc` method returns a binary matrix indicating association of each SNP, where **1** indicates that a SNP is associated with the phenotype and **0** otherwise. Its rows and columns match those of input $p$-value matrix for `GGPA2` method.
+`assoc` method allows both local (`fdrControl="local"`) and global FDR controls (`fdrControl="global"`), and users can control nominal FDR level using the argument `FDR`. The association mapping results above indicate that $2687$ SNPs are estimated to be associated with n5 and $727$ SNPs are estimated to be associated with n3, under the global FDR control at 0.10 level.
+
+`fdr` method for the output of `GGPA2` method (`fit` in this example) further provides the matrix of local FDR that a SNP is not associated with each phenotype, where its rows and columns match those of input $p$-value matrix for `GGPA2` method.
+This method will be useful when users want to scrutinize association of each SNP more closely.
+
+
+When users are interested in the association of a SNP for certain pair of phenotypes, users can specify it using `i` and `j` arguments in both `assoc` and `fdr` methods, where `i` and `j` indicate indices of phenotypes of interest. For example, if users are interested in SNPs associated with both the first and the second phenotypes, we can specify this by setting `i=1, j=1`.
+If the `i` and `j` arguments are specified, `assoc` and `fdr` methods return a corresponding vector instead of a matrix. The association mapping results below indicate that there are $1097$ SNPs associated with both the first and the second phenotypes under the global FDR control at 0.10 level.
+
+```{r}
+assoc.joint <- assoc( fit, FDR=0.10, fdrControl="global", i=1, j=2 )
+length(assoc.joint)
+head(assoc.joint)
+table(assoc.joint)
+```
+
+
+## Investigation of Pleiotropic Architecture Using the Phenotype Graph
+
+In the joint analysis of multiple GWAS data, it is of interest to investigate the genetic relationship among the phenotypes. The GGPA2 framework allows users to check this using a phenotype graph. This phenotype graph can be generated by applying `plot` method to the output of `GGPA2` method (`fit` in this example).
+
+Figure 2 shows the phenotype graph estimated using GGPA2 for the simulation data. The numbers on the edges are the effect sizes for the pairs of phenotypes. In contrast with the true phenotype graph in Figure 1, there is an extra edge between n3 and n5.
+
+```{r fit_G, fig.cap="Figure 2: Phenotype graph estimated using GGPA2"}
+plot(fit, nodesize=8, textsize=5, labelsize=5)
+```
+
+
+## Fit the GGPA2 model without functional annotations
+
+Since functional annotation data are not always available for users, GGPA2 allows for inavailability of annotation data by setting argument `annotMat=NULL` which is the default. The same workflow can be applied.
+
+```{r, eval=FALSE}
+fitNoAnnot <- GGPA2(gwasPval = simulationAnnot$pmat, nBurnin = 200, nMain = 200)
+assoc.marg <- assoc( fitNoAnnot, FDR=0.10, fdrControl="global" )
+assoc.joint <- assoc( fitNoAnnot, FDR=0.10, fdrControl="global", i=1, j=2 )
+plot(fitNoAnnot, nodesize=15)
+```
+
+
+# 3. GGPA2 Analysis Using a Prior Disease Graph
+
+The GGPA2 allows users to incorporate an informative prior disease graph. Specifically, we proposed to generate a prior disease graph based on the gene sharing pattern between diseases in the literature mining [@kim2018improving]. While we showed that this approach effectively improves the GGPA2 analysis in the sense of estimation accuracy, robustness against the collinearity, and reproducibilities between independent validation datasets, it still remains burdensome for most users to implement this literature mining. Hence, in order to facilitate users' convenience, we developed [DDNet](http://www.chunglab.io/ddnet/), a web interface that allows users to query diseases of interest, investigate relationships among them visually, and download the adjacency matrix for the GGPA2 analysis.
+
+First, if you open the web address http://www.chunglab.io/ddnet/ in your web browser, you can see the web interface that looks like Figure 3. In the left side, you can a box and you can query diseases of interest. If you want to try an example list of diseases, just click `Try Example` on the top (Figure 4). Alternatively, you can upload a text file of disease names of interest using the `Upload` button. Note that we constructed our disease dictionary using the [Disease Ontology database](http://disease-ontology.org/). Hence, if you cannot find a disease of your interest, please check the Disease Ontology database. Then, please click the `Submit` button.
+
+
+```{r, echo=FALSE,fig.cap="Figure 3: DDNet web interface: Step 1. Enter http://www.chunglab.io/ddnet/ in your web browser.", out.width="90%"}
+include_graphics("ddnet_step1.png", dpi = 300)
+```
+
+
+```{r, echo=FALSE,fig.cap="Figure 4: DDNet web interface: Step 2. Enter a list of diseases. Click `Try Example` for an example list of diseases.", out.width="90%"}
+include_graphics("ddnet_step2.png", dpi = 300)
+```
+
+
+
+Upon clicking the `Submit` button, you will see a network of the diseases you queried in the right side, as depicted in Figure 5. By either using a bar of typing a value below the `Cut-Off Value` section, you can dynamically investigate disease network structures. Here, an edge is connected between a pair of diseases if the corresponding partial correlation coefficient is larger than the specified cut-off. If you click `Download` button, you can also download the disease network plot in PNG file format.
+
+```{r, echo=FALSE,fig.cap="Figure 5: DDNet web interface: Step 3. Investigate a disease-disease network visually.", out.width="90%"}
+include_graphics("ddnet_step3.png", dpi = 300)
+```
+
+
+If you click the `Table` tab above the disease graph, you can check the adjacency matrix corresponding to the disease network for the specified cut-off (Figure 6). You can also check the raw partial correlation coefficient matrix by clicking the `Raw Matrix` tab below the `Table` tab. By clicking `Download` button, you can download the adjacency matrix in the CSV file format and this can be used as a direct input for the **GGPA2** package.
+
+```{r, echo=FALSE,fig.cap="Figure 6: DDNet web interface: Step 4. Download an adjacency matrix for the GGPA2 analysis.", out.width="90%"}
+include_graphics("ddnet_step4.png", dpi = 300)
+```
+
+
+Supposed that the downloaded CSV file is loaded to the R environment with the object name `pgraph` while the `pmat` has the corresponding genotype-phenotype association $p$-value matrix. Note that it is assumed that objects `pgraph` and `pmat` have the same number of columns and also share the same column names. Then, you can fit a graph-GPA model using the downloaded disease network as a prior distribution using the following command line. Other functions will work exactly in the same way as described in Section 2.
+
+Here for illustration, we let the true phenotype graph be the prior graph `pgraph`:
+
+```{r, message=FALSE, warning=FALSE}
+fitPrior <- GGPA2(gwasPval = simulationAnnot$pmat, pgraph = simulationAnnot$true_G, annotMat = simulationAnnot$A_mat, nBurnin = 200, nMain = 200)
+```
+
+```{r, fig.cap="Figure 7: Phenotype graph estimated using GGPA2 incorporating a prior graph"}
+plot(fitPrior, nodesize=8, textsize=5, labelsize=5)
+```
+
+Figure 7 shows that the estimated phenotype graph is now consistent with the true phenotype graph, suggesting the usefulness of incorporating prior graphs.
+
+# References
