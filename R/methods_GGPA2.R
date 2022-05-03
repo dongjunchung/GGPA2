@@ -31,6 +31,17 @@ setMethod(
   definition = function(x) x@pgraph
 )
 
+
+# get annotations
+setMethod(
+  f = "get_annotMat",
+  signature = "GGPA2",
+  definition = function(x) x@annotMat
+)
+
+
+
+
 # GGPAannot model fit summary
 
 setMethod(
@@ -38,13 +49,21 @@ setMethod(
     signature="GGPA2",
     definition=function( object ) {
 
-    # summary of GGPAannot fit
+    # summary of GGPA2 fit
 
     # constants
 
 		nBin <- nrow(get_gwasPval(object))
 		nGWAS <- ncol(get_gwasPval(object))
-
+		
+		haveAnnot <- sum(get_annotMat(object)) != 0
+		
+		# number of annotations
+    if (haveAnnot) {
+      nAnnot <- ncol(get_annotMat(object))
+    } else {
+      nAnnot <- 0
+    }
 		# estimates
 
 		est_mu_vec = sd_mu_vec = rep(0,nGWAS)
@@ -71,15 +90,28 @@ setMethod(
     EMAT = round(cbind(est_mean_E,sd_mean_E),2)
     rownames(EMAT) = colnames(get_gwasPval(object))
     colnames(EMAT) <- c( "estimate", "SE" )
+    
+    # Gamma estimates
+    if (haveAnnot) {
+      GAMMA = object@summary$est_gamma
+      colnames(GAMMA) = paste0("Annot ",seq(nAnnot))
+      rownames(GAMMA) = paste0("Pheno ",seq(nGWAS))
+      sdGAMMA = object@summary$sd_gamma
+      colnames(sdGAMMA) = paste0("Annot ",seq(nAnnot))
+      rownames(sdGAMMA) = paste0("Pheno ",seq(nGWAS))
+    }
+
 
 		# output
 
-    cat( "Summary: GGPAannot model fitting results (class: GGPAannot)\n" )
+    cat( "Summary: GGPAannot model fitting results (class: GGPA2)\n" )
     cat( "--------------------------------------------------\n" )
     cat( "Data summary:\n" )
     cat( "\tNumber of GWAS data: ", nGWAS , "\n", sep="" )
 		cat( "\tNumber of SNPs: ", nBin , "\n", sep="" )
+		cat( "\tNumber of Annotations: ", nAnnot , "\n", sep="" )
 		cat( "Use a prior phenotype graph? " )
+		
 		if ( get_setting(object)$usePgraph == TRUE ) {
 		  cat( "YES\n" )
 		} else {
@@ -91,7 +123,18 @@ setMethod(
 		print(SIGMA)
 		cat( "Proportion of associated SNPs\n", sep="" )
 		print(EMAT)
+		
+		if (haveAnnot) {
+		  cat( "gamma\n", sep="" )
+		  print(round(GAMMA,2))
+		  cat( "SE of gamma\n", sep="" )
+		  print(round(sdGAMMA,2))
+		}
+		
+		
     cat( "--------------------------------------------------\n" )
+    
+    
   }
 )
 
@@ -200,4 +243,58 @@ setMethod(
 
 		return(get_summary(object))
   }
+)
+
+
+# plot gamma estimates
+
+setMethod(
+  f="plotAnnot",
+  signature=c("GGPA2"),
+  definition=function( object, namePheno = NULL, nameAnnot = NULL) {
+    
+    haveAnnot <- sum(get_annotMat(object)) != 0
+    
+    if (!haveAnnot) {
+      stop("There is no functional annotation available!")
+    }
+    
+    nGWAS <- ncol(get_gwasPval(object))
+    nAnnot <- ncol(get_annotMat(object))
+    
+    # names of phenotype and annotations
+    if (is.null(namePheno)) {
+      namePheno <- paste0("Pheno ",seq(nGWAS))
+    }
+    
+    if (is.null(nameAnnot)) {
+      nameAnnot <- paste0("Annot ",seq(nAnnot))
+    }
+    
+    est_gamma <- vector()
+    for (i in 1:nGWAS) {
+      for (j in 1:nAnnot) {
+        est_gamma <- cbind(est_gamma,object@fit$draw_gamma_mat[,i,j])
+      }
+    }
+    est_gamma <- as.data.frame(est_gamma)
+    colnames(est_gamma) <- paste0(rep(namePheno,each=nAnnot),"-",
+                                  rep(nameAnnot,nGWAS))
+    
+    est_gamma <- est_gamma %>% gather(key="gammas", value="estimates")
+    
+    ggplot(est_gamma, aes(x=gammas, y=estimates, fill=gammas)) + 
+      geom_boxplot(width=0.5, outlier.shape = NA) + 
+      theme_bw() + 
+      theme(text = element_text(size=15),
+            axis.text.x=element_text(angle = 90, size=10, face = "bold"),
+            legend.position = "none") +
+      labs(x=NULL,y="gamma")
+    
+  }
+  
+  
+
+  
+  
 )
