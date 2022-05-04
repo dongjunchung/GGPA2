@@ -9,12 +9,12 @@ Description: This package provides functions for fitting graph-GPA 2.0, a novel 
 License: GPL (>= 2)
 URL: https://github.com/dongjunchung/GGPA2/
 Depends: R (>= 3.6.2), stats, methods, graphics, GGally, network, sna,
-        scales, matrixStats
+        scales, matrixStats, ggplot2, tidyr
 Suggests: 
     knitr,
     BiocStyle,
     rmarkdown
-Imports: Rcpp (>= 0.11.3)
+Imports: Rcpp (>= 0.11.3), ggplot2, tidyr
 LinkingTo: Rcpp, RcppArmadillo
 RcppModules: cGGPA2module
 NeedsCompilation: yes

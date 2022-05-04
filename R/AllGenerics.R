@@ -40,3 +40,15 @@ setGeneric(
   "get_pgraph",
   function(x) standardGeneric("get_pgraph")
 )
+
+# get the annotation matrix
+setGeneric(
+  "get_annotMat",
+  function(x) standardGeneric("get_annotMat")
+)
+
+# plot gamma estimates
+setGeneric( "plotAnnot",
+            function( object, ... )
+              standardGeneric("plotAnnot")
+)

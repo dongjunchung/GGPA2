@@ -2,6 +2,7 @@
 \alias{GGPA2-class}
 \alias{show,GGPA2-method}
 \alias{plot,GGPA2-method}
+\alias{plotAnnot,GGPA2-method}
 \alias{plot,GGPA2,missing-method}
 \alias{fdr,GGPA2-method}
 \alias{estimates,GGPA2-method}
@@ -28,6 +29,8 @@ Objects can be created by calls of the form \code{new("GGPA2", ...)}.
     		representing the p-value matrix from GWAS data. }
     \item{\code{pgraph}:}{Object of class \code{"matrix"}, 
     		representing the prior phenotype graph. }
+    \item{\code{annotMat}:}{Object of class \code{"matrix"}, 
+    		representing the annotation matrix. }
   }
 }
 \section{Methods}{
@@ -43,7 +46,9 @@ Objects can be created by calls of the form \code{new("GGPA2", ...)}.
     }
     \item{estimates}{\code{signature(object = "GGPA2")}: 
         extract parameter estimates from graph-GPA 2.0 model fit. }
+    \item{plotAnnot}{\code{signature(x = "GGPA2", namePheno = NULL, nameAnnot = NULL)}: plot boxplots of estimates of functional annotations. They are Markov random field coefficient estimates for gammas.}
      }
+
 }
 \references{
 Deng Q, Nam JH, Yilmaz AS, Chang W, Pietrzak M, Li L, Kim HJ, and Chung D (2022), "graph-GPA 2.0: A graphical model for multi-disease analysis of GWAS results with integration of functional annotation data."
@@ -61,18 +66,21 @@ Chung D, Kim H, and Zhao H (2016),
 showClass("GGPA2")
 
 # Load the included simulation data
-data(simulation)
+data(simulationAnnot)
 
 # fit GGPA 2.0 model with 200 iterations and a burn-in of 200 iterations
 # Note that we recommend more than 200 iterations in practice
-fit <- GGPA2( simulation$pmat, nMain = 200, nBurnin = 200)
+fit <- GGPA2( gwasPval = simulationAnnot$pmat, annotMat = simulationAnnot$A_mat, nMain = 200, nBurnin = 200)
 
 # Plot GGPA2 model fit
 plot(fit)
 
+# Association mapping
 head(fdr( fit ))
 head(fdr( fit, i=1, j=2 ))
 str(estimates( fit ))
 
+# Plot boxplots of estimates of functional annotations
+plotAnnot(fit)
 }
 \keyword{classes}

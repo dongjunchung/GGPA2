@@ -146,7 +146,7 @@ GGPA2 <- function( gwasPval, pgraph=NULL, annotMat=NULL, nBurnin=10000, nMain=40
   if (is.null(annotMat)){
     have_annot = FALSE
     n_annot = 2
-    annotMat = array(0,c(n_annot,n_SNP))
+    annotMat = array(0,c(n_annot,n_SNP)) # Why?
   } else {
     have_annot = TRUE
     
@@ -455,6 +455,8 @@ GGPA2 <- function( gwasPval, pgraph=NULL, annotMat=NULL, nBurnin=10000, nMain=40
 	  H95_beta = L95_beta = array(0,c(n_pheno,n_pheno))
 	  est_mu_vec = sd_mu_vec = rep(0,n_pheno)
 	  est_sigma1 = sd_sigma1 = rep(0,n_pheno)
+	  
+	  
 
 	  for (i in seq_len(n_pheno)){
 	    est_mu_vec[i] = mean(draw_mu_vec[,i])
@@ -467,6 +469,21 @@ GGPA2 <- function( gwasPval, pgraph=NULL, annotMat=NULL, nBurnin=10000, nMain=40
 	      H95_beta[i,j] = quantile(draw_beta[,i,j],probs=0.975)
 	      L95_beta[i,j] = quantile(draw_beta[,i,j],probs=0.025)
 	    }
+	  }
+	  
+	  ### Final est. with s.e. of Gammas
+	  
+	  if (have_annot==TRUE) {
+	    nAnnot = nrow(annotMat)
+	    est_gamma = sd_gamma = array(0,c(n_pheno,nAnnot))
+	    
+	    for (i in seq_len(n_pheno)){
+	      for (j in seq(nAnnot)){
+	        est_gamma[i,j] = mean(draw_gamma_mat[,i,j])
+	        sd_gamma[i,j] = sd(draw_gamma_mat[,i,j])
+	      }
+	    }
+	    
 	  }
 
 	  if ( verbose >= 3 ) {
@@ -567,6 +584,23 @@ GGPA2 <- function( gwasPval, pgraph=NULL, annotMat=NULL, nBurnin=10000, nMain=40
       draw_u_mat = draw_u_mat
       # draw_normC = draw_normC
     )
+    
+    mcmcSummary <- list(
+      P_hat_ij = P_hat_ij,
+      Sum_E_ijt = Sum_E_ijt,
+      est_beta = est_beta,
+      sd_beta = sd_beta,
+      est_mu_vec = est_mu_vec,
+      sd_mu_vec = sd_mu_vec,
+      est_sigma1 = est_sigma1,
+      sd_sigma1 = sd_sigma1,
+      est_prob_e_ijt = est_prob_e_ijt,
+      sd_prob_e_ijt = sd_prob_e_ijt,
+      est_gamma = est_gamma,
+      sd_gamma = sd_gamma
+    ) 
+    
+    
 	 } else { 
 	   mcmcResult <- list(
 	     loglik = draw_loglikelihood,
@@ -581,23 +615,25 @@ GGPA2 <- function( gwasPval, pgraph=NULL, annotMat=NULL, nBurnin=10000, nMain=40
 	     b_beta = draw_b_beta
 	     # draw_normC = draw_normC
 	   )
+	   
+	   mcmcSummary <- list(
+	     P_hat_ij = P_hat_ij,
+	     Sum_E_ijt = Sum_E_ijt,
+	     est_beta = est_beta,
+	     sd_beta = sd_beta,
+	     est_mu_vec = est_mu_vec,
+	     sd_mu_vec = sd_mu_vec,
+	     est_sigma1 = est_sigma1,
+	     sd_sigma1 = sd_sigma1,
+	     est_prob_e_ijt = est_prob_e_ijt,
+	     sd_prob_e_ijt = sd_prob_e_ijt
+	   ) 
 	 }
 	   
-	  mcmcSummary <- list(
-	    P_hat_ij = P_hat_ij,
-	    Sum_E_ijt = Sum_E_ijt,
-	    est_beta = est_beta,
-	    sd_beta = sd_beta,
-	    est_mu_vec = est_mu_vec,
-	    sd_mu_vec = sd_mu_vec,
-	    est_sigma1 = est_sigma1,
-	    sd_sigma1 = sd_sigma1,
-	    est_prob_e_ijt = est_prob_e_ijt,
-	    sd_prob_e_ijt = sd_prob_e_ijt
-	  )  
+ 
 
 	# return object by creating GGPAannot class object
 
-	  new( "GGPA2", fit = mcmcResult, summary = mcmcSummary, setting = mcmcSetting, gwasPval = gwasPval, pgraph = pgraph )
+	  new( "GGPA2", fit = mcmcResult, summary = mcmcSummary, setting = mcmcSetting, gwasPval = gwasPval, pgraph = pgraph, annotMat = t(annotMat))
 		
 }

@@ -79,7 +79,8 @@ plot(fit)
 plot(fit_prior)
 plot(fit_annot)
 
-
+# plot boxplots of estimates of functional annotations
+plotAnnot(fit_annot)
 
 
 }

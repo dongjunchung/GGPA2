@@ -92,6 +92,9 @@ head(assoc( fit_annot, FDR=0.1, fdrControl="global", i=1, j=2 ))
 # plot the GGPA2 model fit
 plot(fit_annot)
 
+# plot boxplots of estimates of functional annotations
+plotAnnot(fit_annot)
+
 
 }
 \keyword{models}

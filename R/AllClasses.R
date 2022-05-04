@@ -7,6 +7,7 @@ setClass( Class="GGPA2",
     summary="list",
 	  setting="list",
     gwasPval="matrix",
-    pgraph="matrix"
+    pgraph="matrix",
+    annotMat="matrix"
   )
 )
