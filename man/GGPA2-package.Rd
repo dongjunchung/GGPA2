@@ -75,12 +75,12 @@ head(assoc( fit_annot, FDR=0.1, fdrControl="global", i=1, j=2 ))
 
 # plot phenotype graph
 
-plot(fit)
-plot(fit_prior)
-plot(fit_annot)
+plot(fit, type="phenotype")
+plot(fit_prior, type="phenotype")
+plot(fit_annot, type="phenotype")
 
 # plot boxplots of estimates of functional annotations
-plotAnnot(fit_annot)
+plot(fit_annot, type="annotation")
 
 
 }

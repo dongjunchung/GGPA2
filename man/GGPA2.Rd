@@ -61,7 +61,7 @@ head(assoc( fit, FDR=0.1, fdrControl="global" ))
 head(assoc( fit, FDR=0.1, fdrControl="global", i=1, j=2 )) 
 
 # plot the GGPA2 model fit
-plot(fit)
+plot(fit, type="phenotype")
 
 
 
@@ -75,7 +75,7 @@ head(assoc( fit_prior, FDR=0.1, fdrControl="global" ))
 head(assoc( fit_prior, FDR=0.1, fdrControl="global", i=1, j=2 )) 
 
 # plot the GGPA2 model fit
-plot(fit_prior)
+plot(fit_prior, type="phenotype")
 
 
 
@@ -90,10 +90,10 @@ head(assoc( fit_annot, FDR=0.1, fdrControl="global" ))
 head(assoc( fit_annot, FDR=0.1, fdrControl="global", i=1, j=2 )) 
 
 # plot the GGPA2 model fit
-plot(fit_annot)
+plot(fit_annot, type="phenotype")
 
 # plot boxplots of estimates of functional annotations
-plotAnnot(fit_annot)
+plot(fit_annot, type="annotation")
 
 
 }

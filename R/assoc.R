@@ -25,6 +25,7 @@ setMethod(
       message( "Info: Association mapping for each phenotype." )
 
       amat <- matrix( 0, nrow(fdrmat), ncol(fdrmat) )
+      colnames(amat) <- colnames(get_gwasPval(object))
 
   		if ( fdrControl == "local" ) {
   			# local FDR control
@@ -49,8 +50,9 @@ setMethod(
   		}
     } else if ( !is.null(i) & !is.null(j) ) {
       # based on FDR of interest
-
-      message( "Info: Association mapping for specified i & j phenotype pair." )
+    
+      txt <- paste0("Info: Association mapping for the specified phenotype pair: ", "Pheno ",i," and ", "Pheno ",j)  
+      message( txt )
 
       amat <- rep( 0, length(fdrmat) )
 
