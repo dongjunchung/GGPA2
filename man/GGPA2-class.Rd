@@ -73,7 +73,7 @@ data(simulationAnnot)
 fit <- GGPA2( gwasPval = simulationAnnot$pmat, annotMat = simulationAnnot$A_mat, nMain = 200, nBurnin = 200)
 
 # Plot GGPA2 model fit
-plot(fit)
+plot(fit, type="phenotype")
 
 # Association mapping
 head(fdr( fit ))
@@ -81,6 +81,6 @@ head(fdr( fit, i=1, j=2 ))
 str(estimates( fit ))
 
 # Plot boxplots of estimates of functional annotations
-plotAnnot(fit)
+plot(fit, type="annotation")
 }
 \keyword{classes}

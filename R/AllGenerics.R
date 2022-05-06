@@ -47,8 +47,3 @@ setGeneric(
   function(x) standardGeneric("get_annotMat")
 )
 
-# plot gamma estimates
-setGeneric( "plotAnnot",
-            function( object, ... )
-              standardGeneric("plotAnnot")
-)

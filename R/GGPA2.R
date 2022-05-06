@@ -630,10 +630,21 @@ GGPA2 <- function( gwasPval, pgraph=NULL, annotMat=NULL, nBurnin=10000, nMain=40
 	   ) 
 	 }
 	   
- 
+   # check names of phenotypes and annotations
+	 if (is.null(colnames(gwasPval))) {
+	   colnames(gwasPval) <- paste0("Pheno ",seq(nGWAS))
+	 } 
+	 
+	 annotMat =  t(annotMat)
+	 
+	 if (is.null(colnames(annotMat)) & have_annot ) {
+	   colnames(annotMat) <- paste0("Annot ",seq(nAnnot))
+	 }
+	  
+	  
 
 	# return object by creating GGPAannot class object
 
-	  new( "GGPA2", fit = mcmcResult, summary = mcmcSummary, setting = mcmcSetting, gwasPval = gwasPval, pgraph = pgraph, annotMat = t(annotMat))
+	  new( "GGPA2", fit = mcmcResult, summary = mcmcSummary, setting = mcmcSetting, gwasPval = gwasPval, pgraph = pgraph, annotMat = annotMat)
 		
 }

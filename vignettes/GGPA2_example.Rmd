@@ -36,9 +36,9 @@ install_github("dongjunchung/GGPA2")
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-setwd("~/Chunglab/GGPA2_package/GGPA2")
-devtools::load_all()
-#library(GGPA2)
+#setwd("~/Chunglab/GGPA2_package/GGPA2")
+#devtools::load_all()
+library(GGPA2)
 ```
 
 
@@ -145,7 +145,7 @@ In the joint analysis of multiple GWAS data, it is of interest to investigate th
 Figure 2 shows the phenotype graph estimated using GGPA2 for the simulation data. The numbers on the edges represent Markov random field coefficient estimates, which indicate the degrees of genetic correlations for corresponding pairs of phenotypes. In the example, the estimated pheotype is consistent with the true phenotype graph in Figure 1.
 
 ```{r fit_G, fig.cap="Figure 2: Phenotype graph estimated using GGPA2"}
-plot(fit, nodesize=8, textsize=5, labelsize=5)
+plot(fit, type="phenotype", nodesize=8, textsize=5, labelsize=5)
 ```
 
 
@@ -166,7 +166,7 @@ The statistical inferences involving funtional annotations can be conducted base
 
 
 ```{r, fig.cap="Figure 4: Coefficient estimates of $\\gamma$ using GGPA2.", fig.height=5, fig.width=7}
-plotAnnot(fit)
+plot(fit, type="annotation", textsize=8)
 ```
 
 

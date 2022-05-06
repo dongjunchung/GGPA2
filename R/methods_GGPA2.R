@@ -56,6 +56,7 @@ setMethod(
 		nBin <- nrow(get_gwasPval(object))
 		nGWAS <- ncol(get_gwasPval(object))
 		
+		
 		haveAnnot <- sum(get_annotMat(object)) != 0
 		
 		# number of annotations
@@ -64,8 +65,11 @@ setMethod(
     } else {
       nAnnot <- 0
     }
+		
+		
+		
+		
 		# estimates
-
 		est_mu_vec = sd_mu_vec = rep(0,nGWAS)
     est_sigma1 = sd_sigma1 = rep(0,nGWAS)
 
@@ -94,17 +98,17 @@ setMethod(
     # Gamma estimates
     if (haveAnnot) {
       GAMMA = object@summary$est_gamma
-      colnames(GAMMA) = paste0("Annot ",seq(nAnnot))
-      rownames(GAMMA) = paste0("Pheno ",seq(nGWAS))
+      colnames(GAMMA) = colnames(get_annotMat(object))
+      rownames(GAMMA) = colnames(get_gwasPval(object))
       sdGAMMA = object@summary$sd_gamma
-      colnames(sdGAMMA) = paste0("Annot ",seq(nAnnot))
-      rownames(sdGAMMA) = paste0("Pheno ",seq(nGWAS))
+      colnames(sdGAMMA) = colnames(get_annotMat(object))
+      rownames(sdGAMMA) = colnames(get_gwasPval(object))
     }
 
 
 		# output
 
-    cat( "Summary: GGPAannot model fitting results (class: GGPA2)\n" )
+    cat( "Summary: GGPA2 model fitting results (class: GGPA2)\n" )
     cat( "--------------------------------------------------\n" )
     cat( "Data summary:\n" )
     cat( "\tNumber of GWAS data: ", nGWAS , "\n", sep="" )
@@ -143,54 +147,93 @@ setMethod(
 setMethod(
   f="plot",
   signature=c("GGPA2","missing"),
-  definition=function( x, y=NULL, pCutoff = 0.5, betaCI = 0.95, nodesize=20, labelsize=8, textsize=12,Names=NULL,... ) {
-
-    P_hat_ij <- get_summary(x)$P_hat_ij
-    draw_beta <- get_fit(x)$beta
-
-    # calculate posterior probabilities
-    if (is.null(Names)) {
-      Names = dimnames(P_hat_ij)[[1]] 
+  definition=function( x, type = c("phenotype","annotation"), pCutoff = 0.5, betaCI = 0.95, nodesize=20, labelsize=8, textsize=10, Names=NULL,... ) {
+    
+    type <- match.arg(type)
+    
+    if (type == "phenotype") {
+      P_hat_ij <- get_summary(x)$P_hat_ij
+      draw_beta <- get_fit(x)$beta
+      
+      # calculate posterior probabilities
+      if (is.null(Names)) {
+        Names = dimnames(P_hat_ij)[[1]] 
+      }
+      n_pheno = dim(draw_beta)[[2]]
+      
+      P_hat = P_lb_beta = edge_weights = matrix( 0, n_pheno, n_pheno )
+      
+      for (i in seq_len(n_pheno)){
+        for (j in seq_len(n_pheno)){
+          P_hat[i,j] = mean( draw_beta[,i,j] > 0 )
+          P_lb_beta[i,j] = quantile( draw_beta[,i,j], probs = ( 1 - betaCI ) / 2 )
+          edge_weights[i,j] = mean(draw_beta[,i,j])
+        }
+      }
+      dimnames(P_hat)[[1]] = dimnames(P_lb_beta)[[1]] = Names
+      dimnames(P_hat)[[2]] = dimnames(P_lb_beta)[[2]] = Names
+      
+      # 
+      #edge_weights = t(get_summary(fit)$est_beta)
+      
+      # graph construction
+      
+      adjmat <- round(P_hat,2) > pCutoff & P_lb_beta > 0
+      if ( !is.null(Names) ) {
+        Names <- seq_len(n_pheno)
+      } else {
+        rownames(adjmat) <- colnames(adjmat) <- Names
+      }
+      
+      
+      edge_weights <- round(edge_weights*(adjmat*1),2)
+      
+      
+      tmp <- network::network(adjmat, directed = FALSE)
+      tmp %e% "weight" <- edge_weights
+      
+      ggnet2(tmp, label = TRUE, mode = "circle",color="lightblue", 
+             edge.label = "weight", size = nodesize, edge.label.size = labelsize,
+             label.size = textsize)
+      
+    } else if (type == "annotation") {
+      
+      object = x
+      
+      haveAnnot <- sum(get_annotMat(object)) != 0
+      
+      if (!haveAnnot) {
+        stop("There is no functional annotation available!")
+      }
+      
+      nGWAS <- ncol(get_gwasPval(object))
+      nAnnot <- ncol(get_annotMat(object))
+      
+      # names of phenotype and annotations
+      
+      est_gamma <- vector()
+      for (i in 1:nGWAS) {
+        for (j in 1:nAnnot) {
+          est_gamma <- cbind(est_gamma,object@fit$draw_gamma_mat[,i,j])
+        }
+      }
+      est_gamma <- as.data.frame(est_gamma)
+      colnames(est_gamma) <- paste0(rep(colnames(get_gwasPval(object)),each=nAnnot),"-",
+                                    rep(colnames(get_annotMat(object)),nGWAS))
+      
+      est_gamma <- est_gamma %>% gather(key="gammas", value="estimates")
+      
+      ggplot(est_gamma, aes(x=gammas, y=estimates, fill=gammas)) + 
+        geom_boxplot(width=0.5, outlier.shape = NA) + 
+        theme_bw() + 
+        theme(text = element_text(size=15),
+              axis.text.x=element_text(angle = 90, size=textsize, face = "bold"),
+              legend.position = "none") +
+        labs(x=NULL,y="gamma")
+      
     }
-    n_pheno = dim(draw_beta)[[2]]
-
-    P_hat = P_lb_beta = edge_weights = matrix( 0, n_pheno, n_pheno )
-    
-    for (i in seq_len(n_pheno)){
-    	for (j in seq_len(n_pheno)){
-    		P_hat[i,j] = mean( draw_beta[,i,j] > 0 )
-    		P_lb_beta[i,j] = quantile( draw_beta[,i,j], probs = ( 1 - betaCI ) / 2 )
-    		edge_weights[i,j] = mean(draw_beta[,i,j])
-    	}
-    }
-    dimnames(P_hat)[[1]] = dimnames(P_lb_beta)[[1]] = Names
-    dimnames(P_hat)[[2]] = dimnames(P_lb_beta)[[2]] = Names
-
-    # 
-    #edge_weights = t(get_summary(fit)$est_beta)
-    
-    # graph construction
-
-    adjmat <- round(P_hat,2) > pCutoff & P_lb_beta > 0
-    if ( !is.null(Names) ) {
-      Names <- seq_len(n_pheno)
-    } else {
-      rownames(adjmat) <- colnames(adjmat) <- Names
-    }
-
-    #edge_weights <- round(edge_weights[adjmat],1)
-    edge_weights <- round(edge_weights*(adjmat*1),2)
     
     
-    tmp <- network::network(adjmat, directed = FALSE)
-    tmp %e% "weight" <- edge_weights
-    #ggnet2(tmp, label = TRUE, mode = "circle",color="lightblue", 
-    #       edge.label = "weight", node.size = nodesize, edge.label.size = labelsize,
-    #       label.size = textsize)
-    
-    ggnet2(tmp, label = TRUE, mode = "circle",color="lightblue", 
-           edge.label = "weight", size = nodesize, edge.label.size = labelsize,
-           label.size = textsize)
     
   }
 )
@@ -245,56 +288,3 @@ setMethod(
   }
 )
 
-
-# plot gamma estimates
-
-setMethod(
-  f="plotAnnot",
-  signature=c("GGPA2"),
-  definition=function( object, namePheno = NULL, nameAnnot = NULL) {
-    
-    haveAnnot <- sum(get_annotMat(object)) != 0
-    
-    if (!haveAnnot) {
-      stop("There is no functional annotation available!")
-    }
-    
-    nGWAS <- ncol(get_gwasPval(object))
-    nAnnot <- ncol(get_annotMat(object))
-    
-    # names of phenotype and annotations
-    if (is.null(namePheno)) {
-      namePheno <- paste0("Pheno ",seq(nGWAS))
-    }
-    
-    if (is.null(nameAnnot)) {
-      nameAnnot <- paste0("Annot ",seq(nAnnot))
-    }
-    
-    est_gamma <- vector()
-    for (i in 1:nGWAS) {
-      for (j in 1:nAnnot) {
-        est_gamma <- cbind(est_gamma,object@fit$draw_gamma_mat[,i,j])
-      }
-    }
-    est_gamma <- as.data.frame(est_gamma)
-    colnames(est_gamma) <- paste0(rep(namePheno,each=nAnnot),"-",
-                                  rep(nameAnnot,nGWAS))
-    
-    est_gamma <- est_gamma %>% gather(key="gammas", value="estimates")
-    
-    ggplot(est_gamma, aes(x=gammas, y=estimates, fill=gammas)) + 
-      geom_boxplot(width=0.5, outlier.shape = NA) + 
-      theme_bw() + 
-      theme(text = element_text(size=15),
-            axis.text.x=element_text(angle = 90, size=10, face = "bold"),
-            legend.position = "none") +
-      labs(x=NULL,y="gamma")
-    
-  }
-  
-  
-
-  
-  
-)
