@@ -24,6 +24,10 @@ library(knitr)
 
 # 1. Overview 
 
+
+Genome-wide association studies (GWAS) have successfully identified a large number of genetic variants associated with traits and diseases. However, it still remains challenging to fully understand functional mechanisms underlying many associated variants. This is especially the case when we are interested in variants shared across multiple phenotypes. To address this challenge, we propose graph-GPA 2.0 (GGPA 2.0), a novel statistical framework
+to integrate GWAS datasets for multiple phenotypes and incorporate functional annotations within a unified framework.
+
 This vignette provides an introduction to the multi-disease analysis of genome-wide association studies (GWAS) results using the **GGPA2** package. We improved the previous graph-GPA method [@chung2017graph] and included prior knowledge [@kim2018improving].
 R package **GGPA2** implements graph-GPA 2.0 (GGPA2), a novel statistical framework to integrate GWAS datasets for multiple phenotypes and incorporate functional annotations within a unified framework [@deng2022graph]. We encourage questions or requests regarding **GGPA2** package to be posted on Github (https://github.com/dongjunchung/GGPA2) for **GGPA2**. Users can find the most up-to-date versions of **GGPA2** package in our GitHub page (https://dongjunchung.github.io/GGPA2/).
 

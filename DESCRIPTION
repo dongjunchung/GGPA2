@@ -4,22 +4,39 @@ Title: graph-GPA 2.0: A Graphical Model for Multi-disease Analysis of GWAS Resul
 Version: 1.9.1
 Date: 2022-04-10
 Author: Dongjun Chung, Hang J. Kim, Qiaolan Deng
-Maintainer: Dongjun Chung <dongjun.chung@gmail.com>
+Authors@R: c(
+       person("Dongjun", "Chung",     email = "dongjun.chung@gmail.com", role = c("aut", "cre")),
+       person("Hang J.", "Kim",       email = "hang.kim@uc.edu",      role = "aut"),
+       person("Qiaolan", "Deng",      email = "deng.295@osu.edu",      role = "aut")
+       )
 Description: This package provides functions for fitting graph-GPA 2.0, a novel statistical framework to integrate GWAS datasets for multiple phenotypes and incorporate functional annotations within a unified framework. 'GGPA2' package provides user-friendly interface to fit graph-GPA 2.0 models, implement association mapping, generate a phenotype graph, and implement enrichment analysis for functional annotations. 
 License: GPL (>= 2)
-URL: https://github.com/dongjunchung/GGPA2/
-Depends: R (>= 3.6.2), stats, methods, graphics, GGally, network, sna,
-        scales, matrixStats, ggplot2, tidyr
+URL: https://github.com/dongjunchung/GGPA2
+Depends: 
+    R (>= 3.6.2),
+    stats, 
+    methods, 
+    graphics, 
+    GGally, 
+    network, 
+    sna,
+    scales, 
+    matrixStats
 Suggests: 
     knitr,
     BiocStyle,
     rmarkdown
-Imports: Rcpp (>= 0.11.3), ggplot2, tidyr
+Imports: 
+    Rcpp (>= 0.11.3), 
+    ggplot2, 
+    tidyr
 LinkingTo: Rcpp, RcppArmadillo
 RcppModules: cGGPA2module
 NeedsCompilation: yes
+LazyData: false
 biocViews: Software, StatisticalMethod, Classification,
         GenomeWideAssociation, SNP, Genetics, Clustering,
         MultipleComparison, Preprocessing, GeneExpression,
         DifferentialExpression
 VignetteBuilder: knitr
+BugReports: https://github.com/dongjunchung/GGPA2/issues
